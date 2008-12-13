@@ -1,2 +1,3 @@
 pymazon.conf
 .*.sw*
+*.pyc
