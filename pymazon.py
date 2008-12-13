@@ -125,8 +125,7 @@ def main():
 	key = config.get('pymazon', 'AWSAccessKeyId')
 
 	pymazon = PyMazon(key)
-	print pymazon.lookup('9780618669073')
-	print pymazon.lookup('0618669078')
+	print pymazon.lookup('9780534393304').__str__().encode('utf_8')
 
 if __name__ == '__main__':
 	main()
