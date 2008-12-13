@@ -5,6 +5,7 @@ import urllib
 import ConfigParser
 import sys
 import pgdb as dbapi2
+import time
 
 class PyMazonError(Exception):
 	"""Holds information about an error that occured during a pymazon request"""
@@ -74,6 +75,7 @@ class PyMazon:
 	"""A method of looking up book information on Amazon."""
 	def __init__(self, accesskey):
 		self.__key = accesskey
+		self.__last_query_time = 0
 
 	def __form_request(self, isbn):
 		return 'http://webservices.amazon.com/onca/xml?' + \
@@ -113,6 +115,12 @@ class PyMazon:
 	def lookup(self, isbn):
 		file = urllib.urlretrieve(self.__form_request(isbn))[0]
 		xmldoc = minidom.parse(file)
+
+		cur_time = time.time()
+		while cur_time - self.__last_query_time < 1.0:
+			sleep(cur_time - self.__last_query_time)
+			cur_time = time.time()
+		self.__last_query_time = cur_time
 
 		errors = xmldoc.getElementsByTagName('Errors')
 		if len(errors) != 0:
