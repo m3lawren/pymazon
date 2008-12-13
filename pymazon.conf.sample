@@ -1,2 +1,8 @@
 [pymazon]
 AWSAccessKeyId=
+
+[postgres]
+dbname=library
+username=librarian
+password=
+host=localhost
