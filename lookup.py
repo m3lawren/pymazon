@@ -42,12 +42,6 @@ def main():
 			sys.stderr.write('Error: ' + e.message + '\n')
 			continue
 
-		data = {'isbn': isbn, \
-		        'title': book.title, \
-				  'authors': ', '.join(book.authors), \
-				  'year': book.year, \
-				  'edition': book.edition, \
-				  'publisher': book.publisher}
 		print book.__str__().encode('utf_8')
 		
 		cur.execute("SELECT isbn FROM books WHERE isbn=%s;", (isbn,))
