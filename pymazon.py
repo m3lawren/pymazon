@@ -21,16 +21,18 @@ class PyMazonError(StandardError):
 
 class PyMazonBook:
 	"""Stores information about a book retrieved via PyMazon."""
-	def __init__(self, title, authors, isbn, edition):
+	def __init__(self, title, authors, isbn10, isbn13, edition):
 		self.__title = title
 		self.__authors = authors
-		self.__isbn = isbn
+		self.__isbn10 = isbn10
+		self.__isbn13 = isbn13
 		self.__edition = edition
 
 	def __str__(self):
 		return 'Title:     ' + self.__title + '\n' + \
 		       'Author(s): ' + ', '.join(self.__authors) + '\n' \
-				 'ISBN:      ' + self.__isbn + '\n' + \
+				 'ISBN-10:   ' + self.__isbn10 + '\n' + \
+				 'ISBN-13:   ' + self.__isbn13 + '\n' + \
 				 'Edition:   ' + self.__edition
 
 	def __get_title(self):
@@ -39,15 +41,19 @@ class PyMazonBook:
 	def __get_authors(self):
 		return self.__authors
 
-	def __get_isbn(self):
-		return self.__isbn
+	def __get_isbn10(self):
+		return self.__isbn10
+
+	def __get_isbn13(self):
+		return self.__isbn13
 
 	def __get_edition(self):
 		return self.__edition
 
 	title = property(fget=__get_title)
 	authors = property(fget=__get_authors)
-	isbn = property(fget=__get_isbn)
+	isbn10 = property(fget=__get_isbn10)
+	isbn13 = property(fget=__get_isbn13)
 	edition = property(fget=__get_edition)
 
 
@@ -100,10 +106,11 @@ class PyMazon:
 
 		title = self.__extract_single(xmldoc, 'Title')
 		authors = self.__elements_text(xmldoc, 'Author')
-		isbn = self.__extract_single(xmldoc, 'ISBN')
+		isbn10 = self.__extract_single(xmldoc, 'ISBN')
+		isbn13 = self.__extract_single(xmldoc, 'EAN')
 		edition = self.__extract_single(xmldoc, 'Edition')
 
-		return PyMazonBook(title, authors, isbn, edition)
+		return PyMazonBook(title, authors, isbn10, isbn13, edition)
 
 def main():
 	config = ConfigParser.SafeConfigParser()
