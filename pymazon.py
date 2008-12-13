@@ -5,7 +5,7 @@ import urllib
 import ConfigParser
 import sys
 
-class PyMazonError(StandardError):
+class PyMazonError(Exception):
 	"""Holds information about an error that occured during a pymazon request"""
 	def __init__(self, messages):
 		self.__message = '\n'.join(messages)
@@ -21,25 +21,35 @@ class PyMazonError(StandardError):
 
 class PyMazonBook:
 	"""Stores information about a book retrieved via PyMazon."""
-	def __init__(self, title, authors, isbn10, isbn13, edition):
+	def __init__(self, title, authors, publisher, year, isbn10, isbn13, edition):
 		self.__title = title
 		self.__authors = authors
+		self.__publisher = publisher
+		self.__year = year 
 		self.__isbn10 = isbn10
 		self.__isbn13 = isbn13
 		self.__edition = edition
 
 	def __str__(self):
-		return 'Title:     ' + self.__title + '\n' + \
-		       'Author(s): ' + ', '.join(self.__authors) + '\n' \
-				 'ISBN-10:   ' + self.__isbn10 + '\n' + \
-				 'ISBN-13:   ' + self.__isbn13 + '\n' + \
-				 'Edition:   ' + self.__edition
+		return 'Title:     ' + self.title + '\n' + \
+		       'Author(s): ' + ', '.join(self.authors) + '\n' \
+				 'Publisher: ' + self.publisher + '\n' + \
+				 'Year:      ' + self.year + '\n' + \
+				 'ISBN-10:   ' + self.isbn10 + '\n' + \
+				 'ISBN-13:   ' + self.isbn13 + '\n' + \
+				 'Edition:   ' + self.edition
 
 	def __get_title(self):
 		return self.__title
 
 	def __get_authors(self):
 		return self.__authors
+	
+	def __get_publisher(self):
+		return self.__publisher
+
+	def __get_year(self):
+		return self.__year
 
 	def __get_isbn10(self):
 		return self.__isbn10
@@ -52,6 +62,8 @@ class PyMazonBook:
 
 	title = property(fget=__get_title)
 	authors = property(fget=__get_authors)
+	publisher = property(fget=__get_publisher)
+	year = property(fget=__get_year)
 	isbn10 = property(fget=__get_isbn10)
 	isbn13 = property(fget=__get_isbn13)
 	edition = property(fget=__get_edition)
@@ -65,6 +77,7 @@ class PyMazon:
 	def __form_request(self, isbn):
 		return 'http://webservices.amazon.com/onca/xml?' + \
 		       'Service=AWSECommerceService' + \
+				 '&Version=2008-08-19' + \
 		       '&AWSAccessKeyId=' + self.__key + \
 				 '&Operation=ItemLookup' + \
 				 '&ResponseGroup=ItemAttributes' + \
@@ -106,11 +119,13 @@ class PyMazon:
 
 		title = self.__extract_single(xmldoc, 'Title')
 		authors = self.__elements_text(xmldoc, 'Author')
+		publisher = self.__extract_single(xmldoc, 'Publisher')
+		year = self.__extract_single(xmldoc, 'PublicationDate')[0:4]
 		isbn10 = self.__extract_single(xmldoc, 'ISBN')
 		isbn13 = self.__extract_single(xmldoc, 'EAN')
 		edition = self.__extract_single(xmldoc, 'Edition')
 
-		return PyMazonBook(title, authors, isbn10, isbn13, edition)
+		return PyMazonBook(title, authors, publisher, year, isbn10, isbn13, edition)
 
 def main():
 	config = ConfigParser.SafeConfigParser()
@@ -125,7 +140,19 @@ def main():
 	key = config.get('pymazon', 'AWSAccessKeyId')
 
 	pymazon = PyMazon(key)
-	print pymazon.lookup('9780534393304').__str__().encode('utf_8')
+
+	while True:
+		sys.stdout.write('isbn> ')
+
+		isbn = sys.stdin.readline()
+		if isbn == '' or isbn == 'quit\n':
+			break
+		isbn = isbn.strip()
+
+		try:
+			print pymazon.lookup(isbn).__str__().encode('utf_8')
+		except PyMazonError, e:
+			sys.stderr.write('Error: ' + e.message + '\n')
 
 if __name__ == '__main__':
 	main()
