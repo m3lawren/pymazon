@@ -62,6 +62,8 @@ class PyMazon:
 		       '&AWSAccessKeyId=' + self.__key + \
 				 '&Operation=ItemLookup' + \
 				 '&ResponseGroup=ItemAttributes' + \
+				 '&IdType=ISBN' + \
+				 '&SearchIndex=Books' + \
 				 '&ItemId=' + isbn
 
 	def __elements_text(self, element, name):
@@ -116,6 +118,7 @@ def main():
 	key = config.get('pymazon', 'AWSAccessKeyId')
 
 	pymazon = PyMazon(key)
+	print pymazon.lookup('9780618669073')
 	print pymazon.lookup('0618669078')
 
 if __name__ == '__main__':
